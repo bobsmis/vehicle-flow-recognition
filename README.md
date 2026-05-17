@@ -2,6 +2,14 @@
 
 这是一个基于 Python + OpenCV 的车流量统计 GUI 项目。项目不使用 YOLO、DNN 或任何深度学习检测模型，核心流程为：MOG2 高斯混合背景建模、形态学去噪、轮廓几何筛选、质心轨迹跟踪、虚拟计数线穿越统计。
 
+## 组员分工
+
+- 组员 1：负责前景提取、ROI 掩膜和检测参数配置，主要代码文件为 `traffic_counter/member1_foreground.py`、`traffic_counter/config.py`。
+- 组员 2：负责车辆候选区域检测、轮廓筛选和检测流程封装，主要代码文件为 `traffic_counter/member2_vehicle_detection.py`、`traffic_counter/detector.py`。
+- 组员 3：负责车辆 ID 跟踪、轨迹关联和数据模型维护，主要代码文件为 `traffic_counter/tracker.py`、`traffic_counter/models.py`。
+- 组员 4：负责虚拟计数线、过线判断和几何计算，主要代码文件为 `traffic_counter/counter.py`、`traffic_counter/geometry.py`。
+- 组员 5：负责 GUI、视频处理主流程、统计导出、可视化叠加和准确率评估，主要代码文件为 `main.py`、`traffic_counter/gui.py`、`traffic_counter/processor.py`、`traffic_counter/visualization.py`、`traffic_counter/member5_evaluation.py`。
+
 ## 运行环境
 
 - Python 3.10 或更高版本
