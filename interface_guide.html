@@ -1,0 +1,2114 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>车流量统计系统接口查询手册</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --panel-soft: #f8fafc;
+      --text: #172033;
+      --muted: #667085;
+      --line: #d8e0ea;
+      --blue: #1f6feb;
+      --blue-soft: #eaf2ff;
+      --green: #1f8a61;
+      --green-soft: #e8f7f0;
+      --amber: #b46b00;
+      --amber-soft: #fff3dd;
+      --red: #bc3a31;
+      --red-soft: #fff0ef;
+      --code: #0f172a;
+      --shadow: 0 12px 30px rgba(23, 32, 51, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(244, 247, 251, 0.96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+    }
+
+    .topbar-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: grid;
+      grid-template-columns: 1.1fr minmax(300px, 0.9fr);
+      gap: 16px;
+      align-items: center;
+    }
+
+    .title-block h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .title-block p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .query-bar {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 10px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    select,
+    input[type="search"] {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      color: var(--text);
+      padding: 0 12px;
+      outline: none;
+    }
+
+    select:focus,
+    input[type="search"]:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.14);
+    }
+
+    .layout {
+      max-width: 1320px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 22px 24px 34px;
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .sidebar {
+      align-self: start;
+      position: sticky;
+      top: 96px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel-header {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-header h2,
+    .panel-header h3 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    .panel-header p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .member-list {
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .member-btn {
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      padding: 10px;
+      text-align: left;
+      display: grid;
+      gap: 4px;
+      color: var(--text);
+    }
+
+    .member-btn:hover {
+      background: var(--panel-soft);
+      border-color: var(--line);
+    }
+
+    .member-btn.active {
+      background: var(--blue-soft);
+      border-color: #8bb8ff;
+    }
+
+    .member-btn strong {
+      font-size: 14px;
+    }
+
+    .member-btn span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .quick-actions {
+      padding: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--text);
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+
+    .chip:hover,
+    .chip.active {
+      border-color: var(--blue);
+      background: var(--blue-soft);
+      color: #164b9b;
+    }
+
+    .main {
+      display: grid;
+      gap: 18px;
+      min-width: 0;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      padding: 14px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .stat .value {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--blue);
+    }
+
+    .stat .label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 2px;
+    }
+
+    .member-detail {
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .detail-head {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .detail-head h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .detail-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      background: var(--green-soft);
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 9px;
+      white-space: nowrap;
+    }
+
+    .sections {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .doc-card {
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .doc-card.full {
+      grid-column: 1 / -1;
+    }
+
+    .doc-card h3 {
+      margin: 0 0 10px;
+      font-size: 15px;
+    }
+
+    .doc-card ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .doc-card li + li {
+      margin-top: 6px;
+    }
+
+    .path-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .path-list li,
+    code,
+    pre {
+      font-family: Consolas, "Cascadia Mono", "Courier New", monospace;
+    }
+
+    .path-list li {
+      max-width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 7px 9px;
+      color: #24324a;
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    code {
+      background: #eef3f8;
+      color: #172033;
+      border-radius: 4px;
+      padding: 1px 4px;
+      font-size: 0.92em;
+    }
+
+    pre {
+      margin: 0;
+      overflow: auto;
+      background: var(--code);
+      color: #e7eef9;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 13px;
+    }
+
+    .interface-grid,
+    .result-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .interface-card,
+    .result-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .interface-card h4,
+    .result-card h4 {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .io-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .io-box {
+      border: 1px solid var(--line);
+      background: var(--panel-soft);
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .io-box strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+
+    .table-wrap {
+      max-width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      scrollbar-gutter: stable;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      font-size: 14px;
+    }
+
+    th {
+      background: #eef3f8;
+      color: #31405c;
+      font-weight: 800;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .dependency-table {
+      min-width: 1380px;
+      table-layout: fixed;
+    }
+
+    .dependency-table th,
+    .dependency-table td {
+      line-height: 1.55;
+      overflow-wrap: break-word;
+      word-break: normal;
+    }
+
+    .dependency-table th {
+      white-space: nowrap;
+    }
+
+    .dependency-table th:nth-child(1),
+    .dependency-table td:nth-child(1) {
+      width: 190px;
+    }
+
+    .dependency-table th:nth-child(2),
+    .dependency-table td:nth-child(2) {
+      width: 210px;
+    }
+
+    .dependency-table th:nth-child(3),
+    .dependency-table td:nth-child(3) {
+      width: 120px;
+    }
+
+    .dependency-table th:nth-child(4),
+    .dependency-table td:nth-child(4) {
+      width: 230px;
+    }
+
+    .dependency-table th:nth-child(5),
+    .dependency-table td:nth-child(5) {
+      width: 370px;
+    }
+
+    .dependency-table th:nth-child(6),
+    .dependency-table td:nth-child(6) {
+      width: 260px;
+    }
+
+    .notice {
+      border: 1px solid #f0c56a;
+      background: var(--amber-soft);
+      color: #694000;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
+    }
+
+    .danger {
+      border-color: #f0aaa4;
+      background: var(--red-soft);
+      color: var(--red);
+    }
+
+    .empty {
+      padding: 26px;
+      text-align: center;
+      color: var(--muted);
+      background: var(--panel);
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+    }
+
+    mark {
+      background: #ffe08a;
+      color: #172033;
+      border-radius: 3px;
+      padding: 0 2px;
+    }
+
+    @media (max-width: 1280px) {
+      .topbar-inner,
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+      }
+
+      .member-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .topbar-inner,
+      .layout {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .query-bar,
+      .sections,
+      .detail-head,
+      .io-grid,
+      .member-list,
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .title-block h1 {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="title-block">
+          <h1>车流量统计系统接口查询手册</h1>
+          <p>按成员分工查看输入、输出、导入依赖、关键变量和无需关注的模块内容。</p>
+        </div>
+        <div class="query-bar" role="search">
+          <div class="field">
+            <label for="memberSelect">成员视角</label>
+            <select id="memberSelect" aria-label="选择成员视角"></select>
+          </div>
+          <div class="field">
+            <label for="searchInput">查询接口 / 文件 / 数据模型</label>
+            <input id="searchInput" type="search" placeholder="例如 Detection、LineCounter、ROI、输出、成员 3">
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar">
+        <section class="panel">
+          <div class="panel-header">
+            <h2>成员入口</h2>
+            <p>切换后只展示该成员最需要看的内容。</p>
+          </div>
+          <div class="member-list" id="memberList"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h3>快速查询</h3>
+          </div>
+          <div class="quick-actions" id="quickActions"></div>
+        </section>
+      </aside>
+
+      <section class="main">
+        <div class="summary-grid" id="summaryGrid"></div>
+
+        <section class="panel" id="memberPanel">
+          <div class="member-detail" id="memberDetail"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>查询结果</h2>
+            <p id="resultHint">输入关键词后会同时查询成员职责、接口、共享模型和对接表。</p>
+          </div>
+          <div class="member-detail" id="searchResults"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>总体数据流</h2>
+            <p>主流程由成员 5 串联其他成员模块。</p>
+          </div>
+          <div class="member-detail">
+            <pre><code>detector = MotionDetector(params, roi_points, frame.shape)
+tracker = CentroidTracker(params)
+counter = LineCounter(roi_points, line_points)
+
+detections, fg_mask = detector.detect(frame)
+active_tracks = tracker.update(detections)
+events = counter.update(active_tracks, frame_index, timestamp_sec)
+counts = counter.counts()
+annotated = draw_overlay(frame, roi_points, line_points, detections, active_tracks, counts, events)</code></pre>
+            <pre><code>GUI/AppConfig
+  -> VideoProcessor
+  -> MotionDetector
+       -> ForegroundExtractor
+       -> VehicleContourDetector
+  -> CentroidTracker
+  -> LineCounter
+  -> draw_overlay / CSV / JSON / MP4</code></pre>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>成员之间的最小对接表</h2>
+            <p>跨成员协作时优先按此表对接。</p>
+          </div>
+          <div class="member-detail">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>调用方</th>
+                    <th>被调用方</th>
+                    <th>使用接口</th>
+                    <th>传入</th>
+                    <th>返回</th>
+                  </tr>
+                </thead>
+                <tbody id="handoffTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>共享数据模型</h2>
+            <p>这些字段被多个成员依赖，修改时需要同步调用方。</p>
+          </div>
+          <div class="member-detail">
+            <div class="interface-grid" id="modelGrid"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>修改接口检查清单</h2>
+          </div>
+          <div class="member-detail">
+            <div class="notice danger">
+              公开接口、共享模型字段、坐标格式、边界框格式、<code>counts()</code> 的 <code>"total"</code> 键发生变化时，需要同步本文档和对应调用方。
+            </div>
+            <ul>
+              <li>是否改变了公开函数或类的参数？</li>
+              <li>是否改变了 <code>Detection</code>、<code>Track</code>、<code>CountEvent</code>、<code>ProcessingState</code> 的字段？</li>
+              <li>是否改变了 <code>counts()</code> 的键名，尤其是 <code>"total"</code>？</li>
+              <li>是否改变了帧、掩膜、坐标或边界框格式？</li>
+              <li>是否直接调用了其他成员文件中以下划线开头的私有函数？</li>
+              <li>是否同步更新了本文档、README 和对应调用方？</li>
+            </ul>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const docs = {
+      conventions: [
+        "跨成员调用只使用公开接口：类、函数、属性名称不以下划线 _ 开头的内容。",
+        "以下划线开头的函数或方法默认只给当前文件内部使用，其他成员不要直接调用。",
+        "图像帧统一使用 OpenCV 的 BGR numpy.ndarray，坐标统一为原视频像素坐标。",
+        "点坐标格式统一为 [x, y] 或 (x, y)；边界框格式统一为 (x, y, w, h)。",
+        "ROI 使用 list[list[int]]，至少 3 个点才表示有效多边形。",
+        "计数线使用 list[list[int]]，有效时必须刚好 2 个点。"
+      ],
+      members: [
+        {
+          id: "all",
+          name: "全部成员",
+          role: "完整接口视图",
+          summary: "查看所有成员、共享模型和对接关系。",
+          files: ["INTERFACE.md", "interface_guide.html"],
+          focus: ["总览所有公开接口", "查询共享数据模型", "确认跨成员对接关系"],
+          provides: [],
+          external: ["所有成员公开接口", "共享模型", "最小对接表"],
+          imports: [],
+          ignore: ["私有方法和非当前职责实现细节"]
+        },
+        {
+          id: "member1",
+          name: "成员 1",
+          role: "前景提取与 ROI 掩膜",
+          summary: "负责从原始视频帧生成干净的前景掩膜，屏蔽 ROI 外部区域。",
+          files: ["traffic_counter/member1_foreground.py", "traffic_counter/config.py"],
+          focus: [
+            "维护 ForegroundExtractor 的初始化和 extract(frame) 输出",
+            "读取 DetectionParams 中的背景建模、模糊、形态学参数",
+            "保证输出 fg_mask 是单通道 0/255 掩膜"
+          ],
+          provides: [
+            {
+              name: "ForegroundExtractor",
+              file: "traffic_counter/member1_foreground.py",
+              signature: "ForegroundExtractor(params: DetectionParams, roi_points: list[list[int]], frame_shape: tuple[int, int, int])",
+              purpose: "根据视频帧、ROI 和背景建模参数生成前景掩膜。",
+              input: ["params: DetectionParams", "roi_points: list[list[int]]", "frame_shape: tuple[int, int, int]"],
+              output: ["实例对象，供 MotionDetector 持有"],
+              methods: [
+                {
+                  signature: "extract(frame: np.ndarray) -> np.ndarray",
+                  input: ["frame: OpenCV BGR 图像，尺寸应与初始化时 frame_shape 一致"],
+                  output: ["fg_mask: 单通道 np.ndarray，像素值为 0 或 255"]
+                }
+              ]
+            }
+          ],
+          external: [
+            "DetectionParams：读取 history、var_threshold、learning_rate、blur_size、morph_kernel。",
+            "cv2：调用 MOG2、ROI 掩膜、阈值、形态学等图像处理函数。",
+            "numpy：创建 ROI 掩膜和点数组。"
+          ],
+          imports: [
+            {
+              file: "traffic_counter/member1_foreground.py",
+              items: [
+                {
+                  name: "DetectionParams",
+                  source: "traffic_counter/config.py",
+                  kind: "项目数据类",
+                  definition: "检测参数集合，提供 normalized() 方法返回合法化后的参数对象。",
+                  usage: "在 ForegroundExtractor.__init__ 中接收 params，并通过 params.normalized() 得到 self.params。",
+                  meaning: "成员 1 主要使用 history、var_threshold、learning_rate、blur_size、morph_kernel 控制前景提取效果。"
+                },
+                {
+                  name: "cv2.createBackgroundSubtractorMOG2",
+                  source: "opencv-python",
+                  kind: "外部函数",
+                  definition: "OpenCV 的 MOG2 高斯混合背景建模器构造函数。",
+                  usage: "创建 self.subtractor，后续调用 self.subtractor.apply(processed, learningRate=...)。",
+                  meaning: "把视频帧中的运动区域从背景中分离出来，是前景掩膜的核心来源。"
+                },
+                {
+                  name: "cv2.bitwise_and",
+                  source: "opencv-python",
+                  kind: "外部函数",
+                  definition: "按位与操作，可结合 mask 只保留指定区域。",
+                  usage: "在 extract() 中用 ROI 掩膜裁剪原始帧和前景掩膜。",
+                  meaning: "让 ROI 外的道路、建筑或背景不参与检测。"
+                },
+                {
+                  name: "cv2.GaussianBlur",
+                  source: "opencv-python",
+                  kind: "外部函数",
+                  definition: "高斯模糊函数。",
+                  usage: "blur_size 大于 1 时对输入帧做平滑处理。",
+                  meaning: "降低噪声和细碎纹理对背景建模的干扰。"
+                },
+                {
+                  name: "cv2.threshold",
+                  source: "opencv-python",
+                  kind: "外部函数",
+                  definition: "二值化阈值函数。",
+                  usage: "把 MOG2 输出转换成 0/255 的二值 fg_mask。",
+                  meaning: "统一后续轮廓检测输入格式。"
+                },
+                {
+                  name: "cv2.getStructuringElement / morphologyEx / dilate",
+                  source: "opencv-python",
+                  kind: "外部函数组",
+                  definition: "构造形态学核，并执行开运算、闭运算、膨胀。",
+                  usage: "在 extract() 末尾清理噪点、连接车辆区域。",
+                  meaning: "让车辆前景区域更完整，减少细碎误检。"
+                },
+                {
+                  name: "np.ndarray / np.zeros / np.array",
+                  source: "numpy",
+                  kind: "外部类型与函数",
+                  definition: "NumPy 数组类型和数组创建函数。",
+                  usage: "frame、fg_mask 类型标注；_build_roi_mask() 中创建 mask 和 points。",
+                  meaning: "承载图像矩阵、ROI 多边形点和单通道掩膜。"
+                },
+                {
+                  name: "self.params / self.roi_points / self.subtractor / self.roi_mask",
+                  source: "ForegroundExtractor.__init__",
+                  kind: "成员变量",
+                  definition: "前景提取器内部状态。",
+                  usage: "extract() 每帧复用这些状态进行裁剪、建模和形态学处理。",
+                  meaning: "分别表示规范化参数、ROI 点、背景建模器、ROI 掩膜。"
+                }
+              ]
+            },
+            {
+              file: "traffic_counter/config.py",
+              items: [
+                {
+                  name: "json.load / json.dump",
+                  source: "Python 标准库 json",
+                  kind: "标准库函数",
+                  definition: "JSON 读取与写入函数。",
+                  usage: "AppConfig.load() 读取配置，AppConfig.save() 保存配置。",
+                  meaning: "让 GUI 参数、ROI、计数线可以复用。"
+                },
+                {
+                  name: "dataclass / field / asdict",
+                  source: "Python 标准库 dataclasses",
+                  kind: "标准库工具",
+                  definition: "用于声明数据类、默认列表字段和转字典。",
+                  usage: "定义 DetectionParams、AppConfig，并在 to_dict()/normalized() 中转换数据。",
+                  meaning: "减少配置类样板代码，保证配置结构清晰。"
+                },
+                {
+                  name: "Path",
+                  source: "Python 标准库 pathlib",
+                  kind: "标准库类",
+                  definition: "面向对象的路径类型。",
+                  usage: "load()、save() 中处理配置文件路径和父目录创建。",
+                  meaning: "避免手写字符串路径处理。"
+                },
+                {
+                  name: "_clean_points / _optional_int / _odd_at_least / _clamp",
+                  source: "traffic_counter/config.py",
+                  kind: "文件内辅助函数",
+                  definition: "配置合法化辅助函数。",
+                  usage: "AppConfig.normalized() 和 DetectionParams.normalized() 调用。",
+                  meaning: "清理坐标点、可选整数、奇数核大小和数值范围。"
+                }
+              ]
+            }
+          ],
+          ignore: [
+            "车辆轮廓如何变成 Detection。",
+            "轨迹 ID 如何维护。",
+            "计数线如何判断过线。",
+            "GUI、CSV、JSON、MP4 导出逻辑。"
+          ]
+        },
+        {
+          id: "member2",
+          name: "成员 2",
+          role: "车辆候选检测与检测流程封装",
+          summary: "负责把前景掩膜转换成车辆候选 Detection，并通过 MotionDetector 封装成员 1 和成员 2 的流程。",
+          files: ["traffic_counter/member2_vehicle_detection.py", "traffic_counter/detector.py"],
+          focus: [
+            "维护 VehicleContourDetector.detect(fg_mask)",
+            "维护 MotionDetector.detect(frame) 的统一检测入口",
+            "保证 detections 按面积从大到小排序"
+          ],
+          provides: [
+            {
+              name: "VehicleContourDetector",
+              file: "traffic_counter/member2_vehicle_detection.py",
+              signature: "VehicleContourDetector(params: DetectionParams)",
+              purpose: "从前景掩膜中查找轮廓并保留车辆形状。",
+              input: ["params: DetectionParams"],
+              output: ["实例对象"],
+              methods: [
+                {
+                  signature: "detect(fg_mask: np.ndarray) -> list[Detection]",
+                  input: ["fg_mask: 成员 1 输出的单通道前景掩膜"],
+                  output: ["list[Detection]: 按面积从大到小排序的车辆候选结果"]
+                }
+              ]
+            },
+            {
+              name: "MotionDetector",
+              file: "traffic_counter/detector.py",
+              signature: "MotionDetector(params: DetectionParams, roi_points: list[list[int]], frame_shape: tuple[int, int, int])",
+              purpose: "成员 1 和成员 2 的组合门面，供成员 5 主流程调用。",
+              input: ["params: DetectionParams", "roi_points: list[list[int]]", "frame_shape: tuple[int, int, int]"],
+              output: ["实例对象"],
+              methods: [
+                {
+                  signature: "detect(frame: np.ndarray) -> tuple[list[Detection], np.ndarray]",
+                  input: ["frame: OpenCV BGR 图像"],
+                  output: ["detections: 车辆候选列表", "fg_mask: 前景掩膜"]
+                }
+              ]
+            }
+          ],
+          external: [
+            "ForegroundExtractor：从成员 1 获取前景掩膜。",
+            "DetectionParams：读取面积、矩形度、圆形度、宽高比等筛选参数。",
+            "Detection：将轮廓筛选结果包装成统一数据模型。",
+            "cv2：查找轮廓、计算面积、外接矩形、轮廓周长。",
+            "numpy：表示掩膜和轮廓数组。"
+          ],
+          imports: [
+            {
+              file: "traffic_counter/member2_vehicle_detection.py",
+              items: [
+                {
+                  name: "DetectionParams",
+                  source: "traffic_counter/config.py",
+                  kind: "项目数据类",
+                  definition: "检测参数集合，normalized() 返回合法参数。",
+                  usage: "VehicleContourDetector.__init__ 中保存为 self.params。",
+                  meaning: "成员 2 主要使用 min_area、max_area、min_rectangularity、min_circularity、min_aspect_ratio、max_aspect_ratio。"
+                },
+                {
+                  name: "Detection",
+                  source: "traffic_counter/models.py",
+                  kind: "项目数据类",
+                  definition: "车辆候选结果模型，包含 bbox、centroid、area、rectangularity、circularity、aspect_ratio、contour。",
+                  usage: "_contour_to_detection() 通过 Detection(...) 返回候选目标。",
+                  meaning: "把 OpenCV 轮廓转换为成员 3 和成员 5 都能理解的统一数据结构。"
+                },
+                {
+                  name: "cv2.findContours",
+                  source: "opencv-python",
+                  kind: "外部函数",
+                  definition: "从二值图像中提取轮廓。",
+                  usage: "detect(fg_mask) 中获取前景区域轮廓列表。",
+                  meaning: "把成员 1 的 fg_mask 转换成可筛选的候选区域。"
+                },
+                {
+                  name: "cv2.contourArea / boundingRect / arcLength",
+                  source: "opencv-python",
+                  kind: "外部函数组",
+                  definition: "分别计算轮廓面积、外接矩形和轮廓周长。",
+                  usage: "_contour_to_detection() 中计算几何特征。",
+                  meaning: "为面积、矩形度、圆形度、宽高比筛选提供数据。"
+                },
+                {
+                  name: "math.pi",
+                  source: "Python 标准库 math",
+                  kind: "标准库常量",
+                  definition: "圆周率常量。",
+                  usage: "计算 circularity = 4 * pi * area / perimeter²。",
+                  meaning: "衡量轮廓圆形程度，辅助过滤异常形状。"
+                },
+                {
+                  name: "fg_mask / contours / detections / centroid",
+                  source: "detect() 与 _contour_to_detection()",
+                  kind: "关键变量",
+                  definition: "前景掩膜、轮廓列表、候选结果列表、候选目标中心点。",
+                  usage: "从 fg_mask 找轮廓，逐个转成 Detection，并按 area 降序排序。",
+                  meaning: "成员 2 从图像掩膜到车辆候选输出的主要中间数据。"
+                }
+              ]
+            },
+            {
+              file: "traffic_counter/detector.py",
+              items: [
+                {
+                  name: "ForegroundExtractor",
+                  source: "traffic_counter/member1_foreground.py",
+                  kind: "项目类",
+                  definition: "成员 1 提供的前景提取器。",
+                  usage: "MotionDetector.__init__ 中创建 self.foreground_extractor；detect() 中调用 extract(frame)。",
+                  meaning: "为成员 2 的轮廓筛选提供 fg_mask。"
+                },
+                {
+                  name: "VehicleContourDetector",
+                  source: "traffic_counter/member2_vehicle_detection.py",
+                  kind: "项目类",
+                  definition: "成员 2 提供的车辆轮廓筛选器。",
+                  usage: "MotionDetector.__init__ 中创建 self.vehicle_detector；detect() 中调用 detect(fg_mask)。",
+                  meaning: "把前景掩膜转换为 Detection 列表。"
+                },
+                {
+                  name: "Detection",
+                  source: "traffic_counter/models.py",
+                  kind: "项目数据类",
+                  definition: "车辆候选结果模型。",
+                  usage: "作为 MotionDetector.detect() 返回值类型的一部分。",
+                  meaning: "明确主流程拿到的是车辆候选列表。"
+                },
+                {
+                  name: "np.ndarray",
+                  source: "numpy",
+                  kind: "外部类型",
+                  definition: "NumPy 数组类型。",
+                  usage: "用于标注 frame 和 fg_mask 的类型。",
+                  meaning: "说明输入输出仍然是 OpenCV 图像矩阵。"
+                },
+                {
+                  name: "self.params / self.roi_mask / self.subtractor",
+                  source: "MotionDetector.__init__",
+                  kind: "兼容变量",
+                  definition: "从 ForegroundExtractor 暴露出的参数、ROI 掩膜和背景建模器。",
+                  usage: "保留旧代码可能直接读取 MotionDetector 这些属性的兼容性。",
+                  meaning: "主流程通常不直接改这些值，只作为检测器状态。"
+                }
+              ]
+            }
+          ],
+          ignore: [
+            "背景建模的内部实现，只需要保证接收的 fg_mask 是单通道掩膜。",
+            "轨迹关联和 ID 分配。",
+            "过线计数和导出格式。"
+          ]
+        },
+        {
+          id: "member3",
+          name: "成员 3",
+          role: "车辆 ID 跟踪与共享模型",
+          summary: "负责把 Detection 关联成稳定 Track，并维护 Detection、Track、CountEvent 等共享模型。",
+          files: ["traffic_counter/tracker.py", "traffic_counter/models.py"],
+          focus: [
+            "维护 CentroidTracker.update(detections) 的轨迹关联",
+            "保证 Track.track_id 在一次处理流程内唯一",
+            "保证 Track.history 按时间顺序保存质心点"
+          ],
+          provides: [
+            {
+              name: "CentroidTracker",
+              file: "traffic_counter/tracker.py",
+              signature: "CentroidTracker(params: DetectionParams)",
+              purpose: "根据检测结果维护车辆 ID、位置和轨迹历史。",
+              input: ["params: DetectionParams"],
+              output: ["实例对象"],
+              methods: [
+                {
+                  signature: "update(detections: list[Detection]) -> list[Track]",
+                  input: ["detections: 成员 2 输出的车辆候选列表"],
+                  output: ["当前帧仍然活跃的轨迹列表 list[Track]"]
+                }
+              ],
+              properties: ["tracks -> list[Track]", "active_tracks -> list[Track]"]
+            },
+            {
+              name: "bbox_iou",
+              file: "traffic_counter/tracker.py",
+              signature: "bbox_iou(a: BBox, b: BBox) -> float",
+              purpose: "计算两个边界框的 IoU，用于轨迹匹配。",
+              input: ["a: BBox", "b: BBox"],
+              output: ["IoU 浮点数"]
+            }
+          ],
+          external: [
+            "DetectionParams：读取匹配距离、最大丢失帧数、轨迹历史长度。",
+            "Detection：读取候选框 bbox 和质心 centroid。",
+            "Track：维护并输出轨迹对象。",
+            "math.dist：计算质心距离。"
+          ],
+          imports: [
+            {
+              file: "traffic_counter/tracker.py",
+              items: [
+                {
+                  name: "DetectionParams",
+                  source: "traffic_counter/config.py",
+                  kind: "项目数据类",
+                  definition: "检测和跟踪参数集合。",
+                  usage: "CentroidTracker.__init__ 中调用 params.normalized()，读取 max_match_distance、max_lost_frames、track_history。",
+                  meaning: "决定目标匹配距离、轨迹保留时间和轨迹历史长度。"
+                },
+                {
+                  name: "BBox",
+                  source: "traffic_counter/models.py",
+                  kind: "类型别名",
+                  definition: "tuple[int, int, int, int]，格式为 (x, y, w, h)。",
+                  usage: "bbox_iou(a, b) 参数类型。",
+                  meaning: "统一所有检测框和轨迹框的坐标格式。"
+                },
+                {
+                  name: "Detection",
+                  source: "traffic_counter/models.py",
+                  kind: "项目数据类",
+                  definition: "成员 2 输出的车辆候选结果。",
+                  usage: "update(detections) 读取 detection.bbox、detection.centroid。",
+                  meaning: "轨迹关联的输入。"
+                },
+                {
+                  name: "Track",
+                  source: "traffic_counter/models.py",
+                  kind: "项目数据类",
+                  definition: "车辆轨迹对象，包含 track_id、bbox、centroid、history、lost_frames、age。",
+                  usage: "_create_track() 创建 Track；update() 调用 Track.update()/mark_lost()。",
+                  meaning: "成员 3 对外输出给计数和可视化的核心对象。"
+                },
+                {
+                  name: "math.dist",
+                  source: "Python 标准库 math",
+                  kind: "标准库函数",
+                  definition: "计算两个点之间的欧氏距离。",
+                  usage: "比较 track.predicted_centroid 与 detection.centroid 的距离。",
+                  meaning: "判断检测目标是否可能属于某条已有轨迹。"
+                },
+                {
+                  name: "_tracks / _next_id",
+                  source: "CentroidTracker.__init__",
+                  kind: "内部状态变量",
+                  definition: "_tracks 是 track_id 到 Track 的字典；_next_id 是下一个可分配 ID。",
+                  usage: "update()、_create_track()、_remove_stale_tracks() 维护这些状态。",
+                  meaning: "保证同一辆车在多帧之间保持稳定 ID。"
+                },
+                {
+                  name: "pairs / matched_tracks / matched_detections",
+                  source: "CentroidTracker.update()",
+                  kind: "匹配过程变量",
+                  definition: "候选匹配对、已匹配轨迹集合、已匹配检测集合。",
+                  usage: "按距离和 IoU 排序后执行一对一匹配。",
+                  meaning: "避免一个检测框被多个轨迹重复使用。"
+                }
+              ]
+            },
+            {
+              file: "traffic_counter/models.py",
+              items: [
+                {
+                  name: "dataclass / field",
+                  source: "Python 标准库 dataclasses",
+                  kind: "标准库工具",
+                  definition: "快速声明数据模型和默认列表字段。",
+                  usage: "定义 Detection、Track、CountEvent；Track.history 使用 field(default_factory=list)。",
+                  meaning: "让模型字段清晰可见，减少初始化样板代码。"
+                },
+                {
+                  name: "Any",
+                  source: "Python 标准库 typing",
+                  kind: "类型标注",
+                  definition: "任意类型。",
+                  usage: "Detection.contour: Any | None。",
+                  meaning: "OpenCV 轮廓类型不固定，用 Any 保持灵活。"
+                },
+                {
+                  name: "Point / BBox",
+                  source: "traffic_counter/models.py",
+                  kind: "类型别名",
+                  definition: "Point = tuple[int, int]；BBox = tuple[int, int, int, int]。",
+                  usage: "所有模型和几何计算复用。",
+                  meaning: "统一坐标点和边界框的表达方式。"
+                },
+                {
+                  name: "Track.update / mark_lost / velocity / predicted_centroid",
+                  source: "Track 类",
+                  kind: "模型方法与属性",
+                  definition: "更新轨迹、标记丢失、计算速度、预测下一帧质心。",
+                  usage: "CentroidTracker.update() 调用，用于轨迹关联和状态维护。",
+                  meaning: "让跟踪逻辑不需要直接改 Track 内部字段。"
+                }
+              ]
+            }
+          ],
+          ignore: [
+            "车辆候选是如何从图像中检测出来的。",
+            "计数线具体在哪里，只需要维护轨迹历史。",
+            "GUI 和导出逻辑。"
+          ]
+        },
+        {
+          id: "member4",
+          name: "成员 4",
+          role: "虚拟计数线与几何判断",
+          summary: "负责根据 Track.history 判断是否穿过计数线，并输出 CountEvent。",
+          files: ["traffic_counter/counter.py", "traffic_counter/geometry.py"],
+          focus: [
+            "维护 LineCounter.update(tracks, frame_index, timestamp_sec)",
+            "保证同一个 track_id 只计数一次",
+            "保证 counts() 至少包含 total 键"
+          ],
+          provides: [
+            {
+              name: "LineCounter",
+              file: "traffic_counter/counter.py",
+              signature: "LineCounter(roi_points: list[list[int]], line_points: list[list[int]])",
+              purpose: "根据活跃轨迹、ROI 和计数线生成过线事件。",
+              input: ["roi_points: list[list[int]]", "line_points: list[list[int]]"],
+              output: ["实例对象"],
+              methods: [
+                {
+                  signature: "update(tracks: list[Track], frame_index: int, timestamp_sec: float) -> list[CountEvent]",
+                  input: ["tracks: 成员 3 输出的活跃轨迹", "frame_index: 当前帧序号，从 1 开始", "timestamp_sec: 当前帧视频时间，单位秒"],
+                  output: ["当前帧产生的过线事件 list[CountEvent]"]
+                },
+                {
+                  signature: "counts() -> dict[str, int]",
+                  input: ["无"],
+                  output: ["当前统计结果，现有键为 total"]
+                }
+              ],
+              properties: ["total_count -> int", "counted_track_ids: set[int]"]
+            },
+            {
+              name: "crossing_direction",
+              file: "traffic_counter/counter.py",
+              signature: "crossing_direction(previous_side: float, current_side: float) -> int",
+              purpose: "根据轨迹点在计数线两侧的符号判断穿越方向。",
+              input: ["previous_side: float", "current_side: float"],
+              output: ["1、-1 或 0"]
+            },
+            {
+              name: "geometry helpers",
+              file: "traffic_counter/geometry.py",
+              signature: "signed_side / segments_intersect / intersection_point / point_in_polygon / as_points",
+              purpose: "提供计数线判断所需的几何计算。",
+              input: ["点、线段、多边形"],
+              output: ["方向、相交结果、交点或点集"]
+            }
+          ],
+          external: [
+            "Track：读取 track_id、history 和 centroid。",
+            "CountEvent：生成过线事件供成员 5 导出和显示。"
+          ],
+          imports: [
+            {
+              file: "traffic_counter/counter.py",
+              items: [
+                {
+                  name: "as_points",
+                  source: "traffic_counter/geometry.py",
+                  kind: "项目函数",
+                  definition: "把 list[list[int]] 清洗并转换为 list[Point]。",
+                  usage: "LineCounter.__init__ 中转换 roi_points 和 line_points。",
+                  meaning: "让后续几何函数使用统一的 (x, y) 点格式。"
+                },
+                {
+                  name: "signed_side",
+                  source: "traffic_counter/geometry.py",
+                  kind: "项目函数",
+                  definition: "计算点 p 位于有向线段 ab 哪一侧的符号值。",
+                  usage: "LineCounter.update() 分别计算 previous_side 和 current_side。",
+                  meaning: "判断轨迹前后两个点是否跨过计数线。"
+                },
+                {
+                  name: "segments_intersect",
+                  source: "traffic_counter/geometry.py",
+                  kind: "项目函数",
+                  definition: "判断两条线段是否相交。",
+                  usage: "确认车辆中心点移动线段与计数线真实相交。",
+                  meaning: "避免仅因为两侧符号变化导致误计数。"
+                },
+                {
+                  name: "intersection_point",
+                  source: "traffic_counter/geometry.py",
+                  kind: "项目函数",
+                  definition: "计算两条线段所在直线的交点。",
+                  usage: "得到 crossing，再配合 point_in_polygon() 判断是否在 ROI 内。",
+                  meaning: "确保过线发生在用户绘制的检测区域内。"
+                },
+                {
+                  name: "point_in_polygon",
+                  source: "traffic_counter/geometry.py",
+                  kind: "项目函数",
+                  definition: "射线法判断点是否位于多边形内。",
+                  usage: "过滤 ROI 外的交点。",
+                  meaning: "让计数结果只来自有效道路区域。"
+                },
+                {
+                  name: "Track",
+                  source: "traffic_counter/models.py",
+                  kind: "项目数据类",
+                  definition: "成员 3 输出的车辆轨迹对象。",
+                  usage: "update() 读取 track.track_id、track.history、track.centroid。",
+                  meaning: "计数判断只依赖轨迹 ID 和最近两个质心点。"
+                },
+                {
+                  name: "CountEvent",
+                  source: "traffic_counter/models.py",
+                  kind: "项目数据类",
+                  definition: "过线事件模型。",
+                  usage: "LineCounter.update() 在成功计数时创建 CountEvent。",
+                  meaning: "告诉成员 5 哪一帧、哪辆车、什么时间完成过线。"
+                },
+                {
+                  name: "self.roi / self.line / counted_track_ids / _total_count",
+                  source: "LineCounter.__init__",
+                  kind: "计数状态变量",
+                  definition: "ROI 点、计数线点、已计数轨迹 ID 集合、当前总数。",
+                  usage: "update() 和 counts() 读写这些状态。",
+                  meaning: "保证同一条轨迹只统计一次，并提供当前总车流量。"
+                }
+              ]
+            },
+            {
+              file: "traffic_counter/geometry.py",
+              items: [
+                {
+                  name: "Point",
+                  source: "traffic_counter/models.py",
+                  kind: "类型别名",
+                  definition: "tuple[int, int]。",
+                  usage: "几何函数参数类型标注。",
+                  meaning: "统一几何计算中的点坐标格式。"
+                },
+                {
+                  name: "_opposite_or_zero",
+                  source: "traffic_counter/geometry.py",
+                  kind: "文件内辅助函数",
+                  definition: "判断两个符号值是否异号或接近 0。",
+                  usage: "segments_intersect() 中判断线段跨立。",
+                  meaning: "处理点刚好在线上时的边界情况。"
+                },
+                {
+                  name: "d1 / d2 / d3 / d4 / denominator",
+                  source: "geometry.py 几何函数内部",
+                  kind: "几何中间变量",
+                  definition: "跨立符号值和直线交点公式分母。",
+                  usage: "判断相交和计算交点。",
+                  meaning: "属于几何算法内部变量，其他成员不需要直接依赖。"
+                }
+              ]
+            }
+          ],
+          ignore: [
+            "车辆检测和轨迹关联算法。",
+            "GUI 线程、视频读写和文件导出。"
+          ]
+        },
+        {
+          id: "member5",
+          name: "成员 5",
+          role: "GUI、主流程、可视化、导出和评估",
+          summary: "负责桌面界面、视频处理主流程、可视化叠加、统计导出和准确率评估。",
+          files: ["main.py", "traffic_counter/gui.py", "traffic_counter/processor.py", "traffic_counter/visualization.py", "traffic_counter/member5_evaluation.py"],
+          focus: [
+            "维护 TrafficCounterApp 和 VideoProcessor.process()",
+            "串联 MotionDetector、CentroidTracker、LineCounter",
+            "写出标注视频、过线记录 CSV、统计汇总 CSV 和 JSON"
+          ],
+          provides: [
+            {
+              name: "main",
+              file: "main.py",
+              signature: "main() -> int",
+              purpose: "检查依赖并启动 GUI。",
+              input: ["无"],
+              output: ["进程退出码"]
+            },
+            {
+              name: "TrafficCounterApp",
+              file: "traffic_counter/gui.py",
+              signature: "TrafficCounterApp()",
+              purpose: "Tkinter 桌面程序入口，负责选择视频、绘制 ROI 和计数线、编辑参数、启动处理线程、显示实时结果。",
+              input: ["无"],
+              output: ["Tkinter 窗口实例"]
+            },
+            {
+              name: "VideoProcessor",
+              file: "traffic_counter/processor.py",
+              signature: "VideoProcessor(video_path: str, config: AppConfig)",
+              purpose: "执行视频处理、回调预览状态并写出结果文件。",
+              input: ["video_path: 本地视频路径", "config: GUI 收集并规范化后的 AppConfig"],
+              output: ["实例对象"],
+              methods: [
+                {
+                  signature: "process(callback: PreviewCallback | None, stop_event: Event, pause_event: Event) -> ProcessingState",
+                  input: ["callback: 预览回调，可为空", "stop_event: 被设置后停止处理", "pause_event: 被设置后暂停处理"],
+                  output: ["ProcessingState: 最终处理状态"]
+                }
+              ]
+            },
+            {
+              name: "draw_overlay",
+              file: "traffic_counter/visualization.py",
+              signature: "draw_overlay(frame, roi_points, line_points, detections, tracks, counts, events=None) -> np.ndarray",
+              purpose: "绘制 ROI、计数线、候选框、轨迹、总数和本帧过线事件。",
+              input: ["帧、ROI、线、检测、轨迹、计数、事件"],
+              output: ["标注后的图像帧"]
+            },
+            {
+              name: "draw_setup_overlay",
+              file: "traffic_counter/visualization.py",
+              signature: "draw_setup_overlay(frame, roi_points, line_points) -> np.ndarray",
+              purpose: "GUI 配置阶段只绘制 ROI 和计数线。",
+              input: ["frame", "roi_points", "line_points"],
+              output: ["标注后的设置预览帧"]
+            },
+            {
+              name: "evaluate_count_accuracy",
+              file: "traffic_counter/member5_evaluation.py",
+              signature: "evaluate_count_accuracy(counted_total: int, manual_total: int | None) -> AccuracyEvaluation",
+              purpose: "根据程序计数和人工真值计算误差与准确率。",
+              input: ["counted_total: 程序计数", "manual_total: 人工真值，可为空"],
+              output: ["AccuracyEvaluation"]
+            }
+          ],
+          external: [
+            "AppConfig / DetectionParams：读取和保存配置。",
+            "MotionDetector：获取每帧检测结果。",
+            "CentroidTracker：获取每帧活跃轨迹。",
+            "LineCounter：获取计数事件和总数。",
+            "draw_overlay / draw_setup_overlay：生成显示画面。",
+            "evaluate_count_accuracy：生成最终统计。",
+            "cv2：视频读取、视频写入、颜色转换。",
+            "Pillow Image / ImageTk：GUI 图像显示。",
+            "Tkinter：桌面 GUI。",
+            "csv、json、time、pathlib、threading、queue：标准库能力。"
+          ],
+          imports: [
+            {
+              file: "main.py",
+              items: [
+                {
+                  name: "TrafficCounterApp",
+                  source: "traffic_counter/gui.py",
+                  kind: "项目类",
+                  definition: "车流量统计系统的 Tkinter 主窗口类。",
+                  usage: "main() 中创建 app = TrafficCounterApp() 并调用 app.mainloop()。",
+                  meaning: "程序启动后的界面入口。"
+                },
+                {
+                  name: "cv2 / numpy / PIL.Image / PIL.ImageTk",
+                  source: "requirements.txt 对应依赖",
+                  kind: "运行依赖",
+                  definition: "OpenCV、NumPy、Pillow 相关模块。",
+                  usage: "_check_dependencies() 中尝试导入。",
+                  meaning: "提前发现缺失依赖，避免 GUI 启动后才崩溃。"
+                },
+                {
+                  name: "tk / messagebox",
+                  source: "Python 标准库 tkinter",
+                  kind: "标准库 GUI",
+                  definition: "Tkinter 窗口和消息框。",
+                  usage: "_show_dependency_error() 中显示依赖缺失提示。",
+                  meaning: "给普通用户提供可见错误信息。"
+                },
+                {
+                  name: "sys.stderr",
+                  source: "Python 标准库 sys",
+                  kind: "标准错误输出",
+                  definition: "命令行错误输出流。",
+                  usage: "Tkinter 提示失败时 print(message, file=sys.stderr)。",
+                  meaning: "在没有图形弹窗时仍能看到错误。"
+                }
+              ]
+            },
+            {
+              file: "traffic_counter/gui.py",
+              items: [
+                {
+                  name: "AppConfig / DetectionParams",
+                  source: "traffic_counter/config.py",
+                  kind: "项目数据类",
+                  definition: "整体应用配置和检测参数配置。",
+                  usage: "保存 ROI、计数线、输出目录、人工真值；_sync_config_from_vars() 生成 DetectionParams。",
+                  meaning: "GUI 与处理流程之间传递配置的桥梁。"
+                },
+                {
+                  name: "ProcessingState / VideoProcessor",
+                  source: "traffic_counter/processor.py",
+                  kind: "项目类与数据类",
+                  definition: "处理状态模型和视频处理主流程类。",
+                  usage: "_processing_worker() 创建 VideoProcessor；回调中用 ProcessingState 更新界面。",
+                  meaning: "让 GUI 不直接写检测、跟踪、计数算法，只负责启动和显示。"
+                },
+                {
+                  name: "draw_setup_overlay",
+                  source: "traffic_counter/visualization.py",
+                  kind: "项目函数",
+                  definition: "绘制配置阶段的 ROI 和计数线。",
+                  usage: "_render_setup_frame() 和 _render_frame(overlay_setup=True) 中调用。",
+                  meaning: "用户绘制 ROI/计数线时即时显示预览。"
+                },
+                {
+                  name: "cv2.VideoCapture / cv2.cvtColor",
+                  source: "opencv-python",
+                  kind: "外部函数",
+                  definition: "视频读取和颜色空间转换。",
+                  usage: "_select_video() 读取首帧；_render_frame() 转成 RGB 给 Pillow 显示。",
+                  meaning: "把视频帧转换为 GUI 可展示的图像。"
+                },
+                {
+                  name: "Image / ImageTk",
+                  source: "Pillow",
+                  kind: "外部类",
+                  definition: "Pillow 图像对象和 Tkinter 可显示图像对象。",
+                  usage: "_render_frame() 中 resize 后生成 ImageTk.PhotoImage。",
+                  meaning: "让 OpenCV 帧能显示在 Tkinter Canvas 上。"
+                },
+                {
+                  name: "filedialog / messagebox / tk / ttk",
+                  source: "Python 标准库 tkinter",
+                  kind: "标准库 GUI",
+                  definition: "文件选择、弹窗、基础控件和主题控件。",
+                  usage: "构建按钮、输入框、状态栏、选择视频和配置文件。",
+                  meaning: "完整桌面交互界面的基础。"
+                },
+                {
+                  name: "threading.Thread / Event / queue.Queue",
+                  source: "Python 标准库 threading、queue",
+                  kind: "标准库并发工具",
+                  definition: "后台线程、线程事件和线程安全队列。",
+                  usage: "处理视频放在 worker_thread；stop_event/pause_event 控制停止暂停；result_queue 回传帧和状态。",
+                  meaning: "避免视频处理阻塞 GUI。"
+                },
+                {
+                  name: "self.config / first_frame / param_vars / result_queue",
+                  source: "TrafficCounterApp.__init__",
+                  kind: "GUI 状态变量",
+                  definition: "当前配置、视频首帧、参数输入变量字典、后台消息队列。",
+                  usage: "贯穿选择视频、绘制、启动处理和刷新 UI。",
+                  meaning: "GUI 层最重要的状态集合。"
+                }
+              ]
+            },
+            {
+              file: "traffic_counter/processor.py",
+              items: [
+                {
+                  name: "AppConfig",
+                  source: "traffic_counter/config.py",
+                  kind: "项目数据类",
+                  definition: "整体处理配置。",
+                  usage: "VideoProcessor.__init__ 中调用 config.normalized() 并读取 output_dir、params、roi_points、line_points、manual_total。",
+                  meaning: "视频处理主流程的全部输入配置。"
+                },
+                {
+                  name: "MotionDetector",
+                  source: "traffic_counter/detector.py",
+                  kind: "项目类",
+                  definition: "成员 1/2 的检测门面。",
+                  usage: "process() 首帧处理时创建 detector；每帧调用 detector.detect(frame)。",
+                  meaning: "输出 detections 和 fg_mask。"
+                },
+                {
+                  name: "CentroidTracker",
+                  source: "traffic_counter/tracker.py",
+                  kind: "项目类",
+                  definition: "成员 3 的轨迹跟踪器。",
+                  usage: "tracker.update(detections) 生成 active_tracks。",
+                  meaning: "把车辆候选连接成稳定 ID。"
+                },
+                {
+                  name: "LineCounter",
+                  source: "traffic_counter/counter.py",
+                  kind: "项目类",
+                  definition: "成员 4 的过线计数器。",
+                  usage: "counter.update(active_tracks, frame_index, timestamp_sec) 生成 events；counter.counts() 获取总数。",
+                  meaning: "负责去重计数和过线事件。"
+                },
+                {
+                  name: "draw_overlay",
+                  source: "traffic_counter/visualization.py",
+                  kind: "项目函数",
+                  definition: "在视频帧上绘制检测框、轨迹、计数线、总数等信息。",
+                  usage: "process() 每帧生成 annotated 后写入视频并回调 GUI。",
+                  meaning: "输出标注视频和实时预览画面的来源。"
+                },
+                {
+                  name: "evaluate_count_accuracy",
+                  source: "traffic_counter/member5_evaluation.py",
+                  kind: "项目函数",
+                  definition: "根据程序计数和人工真值计算误差与准确率。",
+                  usage: "_build_summary() 中生成统计汇总字段。",
+                  meaning: "把算法结果转成可提交的评估指标。"
+                },
+                {
+                  name: "cv2.VideoCapture / VideoWriter / VideoWriter_fourcc",
+                  source: "opencv-python",
+                  kind: "外部函数与类",
+                  definition: "视频读取、视频写入和编码格式构造。",
+                  usage: "process() 打开输入视频、创建 annotated.mp4 输出。",
+                  meaning: "实现完整的视频输入输出。"
+                },
+                {
+                  name: "csv.DictWriter / json.dump",
+                  source: "Python 标准库 csv、json",
+                  kind: "标准库函数",
+                  definition: "CSV 字典写入器和 JSON 写入函数。",
+                  usage: "_write_event_rows() 写过线记录；_write_summary() 写统计汇总。",
+                  meaning: "生成可查看、可提交的结果文件。"
+                },
+                {
+                  name: "cap / writer / detector / tracker / counter / last_state",
+                  source: "VideoProcessor.process()",
+                  kind: "主流程变量",
+                  definition: "视频读取器、视频写入器、检测器、跟踪器、计数器、最新状态。",
+                  usage: "每一帧按检测、跟踪、计数、可视化、写出、回调的顺序更新。",
+                  meaning: "成员 5 串联所有模块的关键变量。"
+                }
+              ]
+            },
+            {
+              file: "traffic_counter/visualization.py",
+              items: [
+                {
+                  name: "Detection / Track / CountEvent",
+                  source: "traffic_counter/models.py",
+                  kind: "项目数据类",
+                  definition: "检测结果、轨迹对象和过线事件。",
+                  usage: "draw_overlay() 和内部绘制函数读取 bbox、centroid、history、center 等字段。",
+                  meaning: "决定画面上画什么框、轨迹和过线提示。"
+                },
+                {
+                  name: "cv2.rectangle / circle / polylines / arrowedLine / putText / line",
+                  source: "opencv-python",
+                  kind: "外部绘图函数组",
+                  definition: "OpenCV 基础绘图函数。",
+                  usage: "绘制 ROI、计数线、检测框、轨迹线、ID 和事件圆圈。",
+                  meaning: "形成标注视频的主要图形元素。"
+                },
+                {
+                  name: "Image / ImageDraw / ImageFont",
+                  source: "Pillow",
+                  kind: "外部类",
+                  definition: "Pillow 图像、绘制器和字体对象。",
+                  usage: "_draw_pil_text() 绘制中文；_get_font() 加载 Windows 中文字体。",
+                  meaning: "解决 OpenCV putText 对中文支持不足的问题。"
+                },
+                {
+                  name: "_FONT_CACHE",
+                  source: "traffic_counter/visualization.py",
+                  kind: "模块变量",
+                  definition: "按字号缓存已加载字体的字典。",
+                  usage: "_get_font(size) 优先从缓存返回字体。",
+                  meaning: "避免每帧重复加载字体，提高绘制效率。"
+                }
+              ]
+            },
+            {
+              file: "traffic_counter/member5_evaluation.py",
+              items: [
+                {
+                  name: "dataclass",
+                  source: "Python 标准库 dataclasses",
+                  kind: "标准库工具",
+                  definition: "数据类声明装饰器。",
+                  usage: "定义 AccuracyEvaluation。",
+                  meaning: "清晰承载 counted_total、manual_total、error_total、accuracy。"
+                },
+                {
+                  name: "counted_total / manual_total / error_total / accuracy",
+                  source: "evaluate_count_accuracy()",
+                  kind: "评估变量",
+                  definition: "程序计数、人工真值、绝对误差和准确率。",
+                  usage: "计算 accuracy = 1 - error_total / manual_total 的保护版本。",
+                  meaning: "用于最终统计汇总 CSV/JSON。"
+                }
+              ]
+            }
+          ],
+          ignore: [
+            "成员 1/2/3/4 的内部私有方法。",
+            "不应直接绕过 MotionDetector、CentroidTracker、LineCounter 去修改中间状态，除非正在调整对应成员负责的模块。"
+          ]
+        }
+      ],
+      models: [
+        {
+          name: "DetectionParams",
+          owner: "成员 1/2/3 共同使用，文件 traffic_counter/config.py",
+          purpose: "保存检测、筛选、跟踪相关参数。",
+          fields: [
+            "history、var_threshold、learning_rate、blur_size、morph_kernel：成员 1 使用。",
+            "min_area、max_area、min_rectangularity、min_circularity、min_aspect_ratio、max_aspect_ratio：成员 2 使用。",
+            "max_match_distance、max_lost_frames、track_history：成员 3 使用。",
+            "track_history 也会间接影响成员 4/5 的轨迹显示和计数稳定性。"
+          ],
+          interfaces: ["DetectionParams.normalized() -> DetectionParams"]
+        },
+        {
+          name: "AppConfig",
+          owner: "成员 5 主要维护，文件 traffic_counter/config.py",
+          purpose: "保存 GUI 和处理流程需要的整体配置。",
+          fields: ["roi_points", "line_points", "output_dir", "manual_total", "params"],
+          interfaces: ["normalized()", "to_dict()", "from_dict(data)", "load(path)", "save(path)"]
+        },
+        {
+          name: "Detection",
+          owner: "成员 3 维护模型，成员 2 输出，成员 5 可视化使用",
+          purpose: "车辆候选结果。",
+          fields: ["bbox: (x, y, w, h)", "centroid: (x, y)", "area", "rectangularity", "circularity", "aspect_ratio", "contour"],
+          interfaces: []
+        },
+        {
+          name: "Track",
+          owner: "成员 3 输出，成员 4 计数，成员 5 可视化使用",
+          purpose: "车辆轨迹对象。",
+          fields: ["track_id", "bbox", "centroid", "history", "lost_frames", "age", "velocity", "predicted_centroid"],
+          interfaces: ["update(bbox, centroid, history_size)", "mark_lost()"]
+        },
+        {
+          name: "CountEvent",
+          owner: "成员 4 输出，成员 5 导出和显示",
+          purpose: "过线事件。",
+          fields: ["frame_index", "timestamp_sec", "vehicle_number", "track_id", "center"],
+          interfaces: []
+        },
+        {
+          name: "ProcessingState",
+          owner: "成员 5 维护，文件 traffic_counter/processor.py",
+          purpose: "传递实时处理状态给 GUI。",
+          fields: ["frame_index", "total_frames", "fps", "active_tracks", "counts", "output_dir", "annotated_video", "events_in_frame", "elapsed_sec", "processing_fps", "done", "stopped", "error"],
+          interfaces: []
+        }
+      ],
+      handoffs: [
+        ["成员 2", "成员 1", "ForegroundExtractor.extract()", "frame", "fg_mask"],
+        ["成员 5", "成员 2", "MotionDetector.detect()", "frame", "detections, fg_mask"],
+        ["成员 5", "成员 3", "CentroidTracker.update()", "detections", "active_tracks"],
+        ["成员 5", "成员 4", "LineCounter.update()", "active_tracks, frame_index, timestamp_sec", "events"],
+        ["成员 5", "成员 4", "LineCounter.counts()", "无", "{\"total\": int}"],
+        ["成员 5", "成员 5", "draw_overlay()", "帧、ROI、线、检测、轨迹、计数、事件", "标注帧"],
+        ["GUI", "成员 5", "VideoProcessor.process()", "回调、停止事件、暂停事件", "ProcessingState"]
+      ],
+      quickQueries: ["公开接口", "导入依赖", "关键变量", "输入", "输出", "外部接口", "不需要关注", "Detection", "Track", "CountEvent", "LineCounter", "MotionDetector", "VideoProcessor", "AppConfig", "cv2", "counts"]
+    };
+
+    const state = {
+      selectedMember: "member1",
+      query: ""
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function normalize(value) {
+      return String(value || "").toLowerCase().trim();
+    }
+
+    function highlight(text) {
+      const value = escapeHtml(text);
+      const query = state.query.trim();
+      if (!query) {
+        return value;
+      }
+      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      return value.replace(new RegExp(escapedQuery, "gi"), (match) => `<mark>${match}</mark>`);
+    }
+
+    function listHtml(items) {
+      if (!items || items.length === 0) {
+        return "<p class=\"meta\">无</p>";
+      }
+      return `<ul>${items.map((item) => `<li>${highlight(item)}</li>`).join("")}</ul>`;
+    }
+
+    function pathListHtml(items) {
+      return `<ul class="path-list">${items.map((item) => `<li>${highlight(item)}</li>`).join("")}</ul>`;
+    }
+
+    function importUsageHtml(groups) {
+      if (!groups || groups.length === 0) {
+        return "<p class=\"meta\">当前视角没有单独的导入说明，请选择具体成员查看。</p>";
+      }
+      return groups.map((group) => `
+        <article class="interface-card">
+          <h4>${highlight(group.file)}</h4>
+          <div class="table-wrap">
+            <table class="dependency-table">
+              <thead>
+                <tr>
+                  <th>导入 / 名称</th>
+                  <th>来源</th>
+                  <th>类型</th>
+                  <th>定义</th>
+                  <th>本文件中的用法</th>
+                  <th>含义</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${group.items.map((item) => `
+                  <tr>
+                    <td>${highlight(item.name)}</td>
+                    <td>${highlight(item.source)}</td>
+                    <td>${highlight(item.kind)}</td>
+                    <td>${highlight(item.definition)}</td>
+                    <td>${highlight(item.usage)}</td>
+                    <td>${highlight(item.meaning)}</td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function getSelectedMember() {
+      return docs.members.find((member) => member.id === state.selectedMember) || docs.members[1];
+    }
+
+    function toSearchText(value) {
+      if (Array.isArray(value)) {
+        return value.map(toSearchText).join(" ");
+      }
+      if (value && typeof value === "object") {
+        return Object.values(value).map(toSearchText).join(" ");
+      }
+      return String(value || "");
+    }
+
+    function searchableText(...parts) {
+      return normalize(parts.map(toSearchText).join(" "));
+    }
+
+    function renderMemberSelectors() {
+      const memberSelect = $("memberSelect");
+      memberSelect.innerHTML = docs.members.map((member) => {
+        return `<option value="${member.id}">${member.name} - ${member.role}</option>`;
+      }).join("");
+      memberSelect.value = state.selectedMember;
+
+      $("memberList").innerHTML = docs.members.map((member) => {
+        const active = member.id === state.selectedMember ? " active" : "";
+        return `
+          <button class="member-btn${active}" data-member="${member.id}" type="button">
+            <strong>${member.name}</strong>
+            <span>${member.role}</span>
+          </button>
+        `;
+      }).join("");
+
+      document.querySelectorAll("[data-member]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.selectedMember = button.dataset.member;
+          $("memberSelect").value = state.selectedMember;
+          render();
+        });
+      });
+    }
+
+    function renderQuickActions() {
+      $("quickActions").innerHTML = docs.quickQueries.map((query) => {
+        const active = normalize(query) === normalize(state.query) ? " active" : "";
+        return `<button class="chip${active}" type="button" data-query="${escapeHtml(query)}">${escapeHtml(query)}</button>`;
+      }).join("");
+      document.querySelectorAll("[data-query]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.query = button.dataset.query;
+          $("searchInput").value = state.query;
+          render();
+        });
+      });
+    }
+
+    function renderSummary() {
+      const selected = getSelectedMember();
+      const shownMembers = selected.id === "all" ? docs.members.length - 1 : 1;
+      const interfaceCount = (selected.id === "all"
+        ? docs.members.flatMap((member) => member.provides || [])
+        : selected.provides
+      ).length;
+      const fileCount = selected.id === "all"
+        ? new Set(docs.members.flatMap((member) => member.files || [])).size
+        : selected.files.length;
+
+      const items = [
+        ["成员视角", shownMembers, selected.id === "all" ? "全部成员" : selected.name],
+        ["公开接口", interfaceCount, "类 / 函数 / 方法"],
+        ["负责文件", fileCount, "当前视角相关文件"],
+        ["共享模型", docs.models.length, "跨模块数据结构"]
+      ];
+
+      $("summaryGrid").innerHTML = items.map(([label, value, note]) => `
+        <article class="stat">
+          <div class="value">${escapeHtml(value)}</div>
+          <div class="label">${escapeHtml(label)} · ${escapeHtml(note)}</div>
+        </article>
+      `).join("");
+    }
+
+    function interfaceCardHtml(item) {
+      const methods = (item.methods || []).map((method) => `
+        <div class="io-box">
+          <strong>${highlight(method.signature)}</strong>
+          <div class="meta">输入</div>
+          ${listHtml(method.input)}
+          <div class="meta">输出</div>
+          ${listHtml(method.output)}
+        </div>
+      `).join("");
+
+      const properties = item.properties && item.properties.length > 0
+        ? `<div><strong>公开属性</strong>${listHtml(item.properties)}</div>`
+        : "";
+
+      return `
+        <article class="interface-card">
+          <h4>${highlight(item.name)}</h4>
+          <div class="meta">${highlight(item.file)}</div>
+          <pre><code>${highlight(item.signature)}</code></pre>
+          <p>${highlight(item.purpose)}</p>
+          <div class="io-grid">
+            <div class="io-box"><strong>输入</strong>${listHtml(item.input)}</div>
+            <div class="io-box"><strong>输出</strong>${listHtml(item.output)}</div>
+          </div>
+          ${properties}
+          ${methods ? `<div><strong>公开方法</strong><div class="interface-grid">${methods}</div></div>` : ""}
+        </article>
+      `;
+    }
+
+    function renderMemberDetail() {
+      const selected = getSelectedMember();
+      const members = selected.id === "all" ? docs.members.filter((member) => member.id !== "all") : [selected];
+
+      const memberBlocks = members.map((member) => `
+        <div class="detail-head">
+          <div>
+            <h2>${member.name}：${member.role}</h2>
+            <p>${highlight(member.summary)}</p>
+          </div>
+          <span class="badge">${member.provides.length} 个公开接口</span>
+        </div>
+
+        <div class="sections">
+          <article class="doc-card">
+            <h3>负责文件</h3>
+            ${pathListHtml(member.files)}
+          </article>
+          <article class="doc-card">
+            <h3>当前重点</h3>
+            ${listHtml(member.focus)}
+          </article>
+          <article class="doc-card full">
+            <h3>导入依赖与本文件使用说明</h3>
+            <div class="interface-grid">
+              ${importUsageHtml(member.imports)}
+            </div>
+          </article>
+          <article class="doc-card">
+            <h3>需要了解的外部接口</h3>
+            ${listHtml(member.external)}
+          </article>
+          <article class="doc-card">
+            <h3>不需要关注</h3>
+            ${listHtml(member.ignore)}
+          </article>
+          <article class="doc-card full">
+            <h3>对外提供</h3>
+            <div class="interface-grid">
+              ${member.provides.length ? member.provides.map(interfaceCardHtml).join("") : "<p class=\"meta\">请选择具体成员查看公开接口。</p>"}
+            </div>
+          </article>
+        </div>
+      `).join('<div class="notice">以下为下一个成员视角。</div>');
+
+      $("memberDetail").innerHTML = memberBlocks;
+    }
+
+    function renderModels() {
+      $("modelGrid").innerHTML = docs.models.map((model) => `
+        <article class="interface-card">
+          <h4>${highlight(model.name)}</h4>
+          <div class="meta">${highlight(model.owner)}</div>
+          <p>${highlight(model.purpose)}</p>
+          <div class="io-grid">
+            <div class="io-box"><strong>字段</strong>${listHtml(model.fields)}</div>
+            <div class="io-box"><strong>公开接口</strong>${listHtml(model.interfaces)}</div>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderHandoffs() {
+      $("handoffTable").innerHTML = docs.handoffs.map((row) => `
+        <tr>
+          ${row.map((cell) => `<td>${highlight(cell)}</td>`).join("")}
+        </tr>
+      `).join("");
+    }
+
+    function collectSearchItems() {
+      const memberItems = docs.members.filter((member) => member.id !== "all").map((member) => ({
+        type: "成员职责",
+        title: `${member.name}：${member.role}`,
+        body: [member.summary, member.files, member.focus, member.external, member.imports, member.ignore],
+        html: `
+          <article class="result-card">
+            <h4>${member.name}：${member.role}</h4>
+            <div class="meta">成员职责</div>
+            <p>${highlight(member.summary)}</p>
+            <strong>负责文件</strong>
+            ${pathListHtml(member.files)}
+          </article>
+        `
+      }));
+
+      const importItems = docs.members.flatMap((member) => (member.imports || []).flatMap((group) => group.items.map((item) => ({
+        type: "导入依赖",
+        title: `${member.name} / ${group.file} / ${item.name}`,
+        body: [member.name, member.role, group.file, item],
+        html: `
+          <article class="result-card">
+            <h4>${member.name} / ${highlight(item.name)}</h4>
+            <div class="meta">导入依赖 · ${highlight(group.file)} · 来源：${highlight(item.source)}</div>
+            <div class="io-grid">
+              <div class="io-box"><strong>定义</strong><p>${highlight(item.definition)}</p></div>
+              <div class="io-box"><strong>本文件中的用法</strong><p>${highlight(item.usage)}</p></div>
+            </div>
+            <p>${highlight(item.meaning)}</p>
+          </article>
+        `
+      }))));
+
+      const interfaceItems = docs.members.flatMap((member) => (member.provides || []).map((item) => ({
+        type: "公开接口",
+        title: `${member.name} / ${item.name}`,
+        body: [member.name, member.role, item.name, item.file, item.signature, item.purpose, item.input, item.output, item.methods || [], item.properties || []],
+        html: `
+          <article class="result-card">
+            <h4>${member.name} / ${highlight(item.name)}</h4>
+            <div class="meta">公开接口 · ${highlight(item.file)}</div>
+            <pre><code>${highlight(item.signature)}</code></pre>
+            <p>${highlight(item.purpose)}</p>
+          </article>
+        `
+      })));
+
+      const modelItems = docs.models.map((model) => ({
+        type: "共享模型",
+        title: model.name,
+        body: [model.name, model.owner, model.purpose, model.fields, model.interfaces],
+        html: `
+          <article class="result-card">
+            <h4>${highlight(model.name)}</h4>
+            <div class="meta">共享模型 · ${highlight(model.owner)}</div>
+            <p>${highlight(model.purpose)}</p>
+            ${listHtml(model.fields.slice(0, 4))}
+          </article>
+        `
+      }));
+
+      const handoffItems = docs.handoffs.map((row) => ({
+        type: "最小对接",
+        title: row[2],
+        body: row,
+        html: `
+          <article class="result-card">
+            <h4>${highlight(row[2])}</h4>
+            <div class="meta">${highlight(row[0])} 调用 ${highlight(row[1])}</div>
+            <div class="io-grid">
+              <div class="io-box"><strong>传入</strong><p>${highlight(row[3])}</p></div>
+              <div class="io-box"><strong>返回</strong><p>${highlight(row[4])}</p></div>
+            </div>
+          </article>
+        `
+      }));
+
+      return [...memberItems, ...interfaceItems, ...importItems, ...modelItems, ...handoffItems];
+    }
+
+    function renderSearchResults() {
+      const query = state.query.trim();
+      const container = $("searchResults");
+      const hint = $("resultHint");
+      if (!query) {
+        hint.textContent = "输入关键词后会同时查询成员职责、接口、共享模型和对接表。";
+        container.innerHTML = `<div class="empty">当前未输入查询词。可以搜索 Detection、Track、LineCounter、成员 5、输出、ROI 等关键词。</div>`;
+        return;
+      }
+
+      const queryNorm = normalize(query);
+      const items = collectSearchItems().filter((item) => searchableText(item.title, item.type, item.body).includes(queryNorm));
+      hint.textContent = `关键词「${query}」命中 ${items.length} 条内容。`;
+      if (items.length === 0) {
+        container.innerHTML = `<div class="empty">没有找到匹配内容。可以换成接口名、文件名、成员编号或数据模型字段。</div>`;
+        return;
+      }
+
+      container.innerHTML = `<div class="result-list">${items.map((item) => item.html).join("")}</div>`;
+    }
+
+    function bindEvents() {
+      $("memberSelect").addEventListener("change", (event) => {
+        state.selectedMember = event.target.value;
+        render();
+      });
+      $("searchInput").addEventListener("input", (event) => {
+        state.query = event.target.value;
+        render();
+      });
+    }
+
+    function render() {
+      renderMemberSelectors();
+      renderQuickActions();
+      renderSummary();
+      renderMemberDetail();
+      renderModels();
+      renderHandoffs();
+      renderSearchResults();
+    }
+
+    bindEvents();
+    render();
+  </script>
+</body>
+</html>
